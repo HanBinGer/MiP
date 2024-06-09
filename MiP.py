@@ -19,16 +19,34 @@ def system(state, t):
     return [dydt, dvdt]
 
 def check():
-    global V, Y, dt
+    global V, Y, dt, T
     solution = odeint(system, [1.0, 0.0], T)
 
-    y_ground_true = solution[:, 0]
-    v_ground_true = solution[:, 1]
+    y_odeint = solution[:, 0]
+    v_odeint = solution[:, 1]
 
-    if not np.allclose(y_ground_true, Y, atol=dt):
+    if not np.allclose(y_odeint, Y, atol=dt):
         print("y not equal")
-    if not np.allclose(v_ground_true, V, atol=dt):
+    if not np.allclose(v_odeint, V, atol=dt):
         print("v not equal")
+
+    fig, ax = plt.subplots(3)
+    fig.set_figheight(10)
+    fig.set_figwidth(12)
+
+    ax[0].plot(T, Y, label='y')
+    ax[0].plot(T, V, label='dy/dt')
+    ax[0].legend()
+
+    ax[1].plot(T, y_odeint, label='y odeint')
+    ax[1].plot(T, Y, label='y Runge-Kutta', linestyle='dashed')
+    ax[1].legend()
+
+    ax[2].plot(T, v_odeint, label='dy/dt odeint')
+    ax[2].plot(T, V, label='dy/dt Runge-Kutta', linestyle='dashed')
+    ax[2].legend()
+    
+    plt.show()
 
 x0 = -10.0
 x1 = 10.0
@@ -59,11 +77,3 @@ for i in range(1, n):
     V[i] = V[i-1] + (k1_v + 2*k2_v + 2*k3_v + k4_v) / 6
 
 check()
-
-plt.figure(figsize=(12, 10))
-plt.plot(T, Y, label='y')
-plt.plot(T, V, label='dy/dt')
-plt.xlabel('t')
-
-plt.legend()
-plt.show()
